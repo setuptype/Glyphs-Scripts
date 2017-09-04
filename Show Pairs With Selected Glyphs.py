@@ -11,13 +11,12 @@ Pairs consisting of glyphs with both left and right kerning are displayed as tri
 def s(g):
 	return 'HN' if g.isupper() else 'nu'
 
+left = []
+right = []
 
-Font = Glyphs.font
-glyphs = Font.selectedLayers
+# get kerning groups of selected glyphs
 
-# get kerning groups
-
-for glyph in Font.glyphs:
+for glyph in Glyphs.font.selection:
 	a = glyph.rightKerningGroup
 	if a != None and not (a in left):
 		left.append(a)
@@ -30,30 +29,17 @@ for glyph in Font.glyphs:
 skip	= []
 output	= ''
 
-for glyph in glyphs:
-	
-	g = glyph.parent.name
-	
-	for a in left:
-		pair = '/' + a + '/' + g
-		if g + a not in skip:
-			string = pair + ' ' + s(g)
+for a in left:
+	for b in right:
+		pair = '/' + a + '/' + b
+		if b + a not in skip:
+			string = pair + ' ' + s(b)
 			if a in right:
 				string = pair + '/' + a + ' ' + s(a)
-				skip.append(a + g)
+				skip.append(a + b)
 			output += s(a) + string + '\n'
-	
-	for b in right:
-		pair = '/' + g + '/' + b
-		if b + g not in skip:
-			string = pair + ' ' + s(b)
-			if b in left:
-				string = pair + '/' + g + ' ' + s(g)
-				skip.append(g + b)
-			output += s(g) + string + '\n'
-			
-				
-# #display result
+		
+#display result
 
 from PyObjCTools.AppHelper import callAfter
 callAfter(Glyphs.currentDocument.windowController().addTabWithString_, output)
