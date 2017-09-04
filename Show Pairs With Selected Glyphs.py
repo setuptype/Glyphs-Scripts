@@ -34,10 +34,11 @@ for a in left:
 		pair = '/' + a + '/' + b
 		if b + a not in skip:
 			string = pair + ' ' + s(b)
+			output += s(a) + string + '\n'
 			if a in right:
 				string = pair + '/' + a + ' ' + s(a)
 				skip.append(a + b)
-			output += s(a) + string + '\n'
+				output += s(a) + string + '\n'
 		
 #display result
 
