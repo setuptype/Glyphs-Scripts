@@ -1,4 +1,4 @@
-#MenuTitle: Show Pairs With Selected Glyph
+#MenuTitle: Show Pairs With Selected Glyphs
 # -*- coding: utf-8 -*-
 
 __doc__="""
