@@ -6,6 +6,10 @@ Python scripts for [Glyphs font editor](http://glyphsapp.com/).
 
 Put the scripts into the *Scripts* folder which appears when you choose *Open Scripts Folder* from the *Scripts* menu.
 
+## Important
+
+The scripts only work if actual glyph names are used to name kerning groups.
+
 ## License
 
 Copyright 2016 Ondrej Jób (@setuptype).  

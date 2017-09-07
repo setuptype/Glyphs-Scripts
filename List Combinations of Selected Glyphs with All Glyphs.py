@@ -1,13 +1,10 @@
-#MenuTitle: Suggest New Kerning Pairs
+#MenuTitle: List Combinations of Selected Glyphs with Other Glyphs
 # -*- coding: utf-8 -*-
 
 __doc__="""
-Displays pairs that aren't kerned, but the glyphs of the pair are in a kerning group OR are kerned with other glyphs OR are usually kerned.
-Example: If pairs AV and LT are kerned, the script will suggest pairs AT and LV.
+Lists all combinations of selected glyphs with glyphs that are already kerned OR are usually kerned.
 
-Pairs consisting of glyphs with both left and right kerning are displayed as triplets, e.g. AVA, OTO.
-
-Only works if actual glyph names are used to name kerning groups.
+Pairs consisting of glyphs with both left and right kerning are displayed as triplets, e.g. AVA.
 """
 
 
@@ -39,17 +36,15 @@ for glyph in font.glyphs:
 	if R != None and not (R in right):
 		right.append(R)
 
-# get existing kerning pairs
-# add glyphs with kerning that are not in a group to the left or right list
+
+# add glyphs with kerning that are not in a group to left/right lists
 
 kerning	= font.kerning[font.selectedFontMaster.id]
-existing = []
 
 for L in kerning:
 	for R in kerning[L]:
 		l = getName(L)
 		r = getName(R)
-		existing.append(l + r)
 		if l not in left:
 			left.append(l)
 		if r not in right:
@@ -61,17 +56,28 @@ for L in kerning:
 skip	= []
 output	= ''
 
-for L in left:
-	for R in right:
-		pair = '/' + L + '/' + R
-		if L + R not in existing and R + L not in skip:
-			output += string(L) + pair + ' ' + string(R) + '\n'
+for glyph in font.selection:
+	
+	g = glyph.name
+	
+	for L in left:
+		pair = '/' + L + '/' + g
+		if g + L not in skip:
+			output += string(L) + pair + ' ' + string(g) + '\n'
 			if L in right:
-				skip.append(L + R)
+				skip.append(L + g)
 				output += string(L) + pair + '/' + L + ' ' + string(L) + '\n'
-
-
-#display result
+	
+	for R in right:
+		pair = '/' + g + '/' + R
+		if R + g not in skip:
+			output += string(g) + pair + ' ' + string(R) + '\n'
+			if R in left:
+				skip.append(g + R)
+				output += string(g) + pair + '/' + g + ' ' + string(g) + '\n'
+			
+				
+# #display result
 
 from PyObjCTools.AppHelper import callAfter
 callAfter(Glyphs.currentDocument.windowController().addTabWithString_, output)
