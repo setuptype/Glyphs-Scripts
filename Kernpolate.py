@@ -2,20 +2,24 @@
 # -*- coding: utf-8 -*-
 
 __doc__="""
-Calculates and applies kerning to all masters based on the kerning in the boldest weight. The script uses glyph widths and masters weight values for calculations.
+Adjusts and applies kerning from the boldest master to lighter masters.
+
+If kerning for a given pair already exists in a lighter master, the script skips it and lists the pair.
 
 Only works if actual glyph names are used to name groups.
 """
+
+Glyphs.clearLog()
 
 import math
 font = Glyphs.font
 
 def getWidth(g, id):
 	g = getName(g)
-	if g:
+	try:
 		return font.glyphs[g].layers[id].width
-	else:
-		return 0
+	except:
+		return None
 
 def getName(g):
 	if g[0] == '@':
@@ -37,27 +41,39 @@ for master in font.masters:
 		
 Kerning = font.kerning[Master.id]
 
+output = ''
+missing = []
+
 for master in font.masters:
 	if master.id != Master.id:
-		print master.name + ' Exceptions:'
-		print ''
+		output += master.name + ' Exceptions:\n\n'
 		for L in Kerning:
-			for R in Kerning[L]:
-				Width = getWidth(L, Master.id) + getWidth(R, Master.id)
-				width = getWidth(L, master.id) + getWidth(R, master.id)
-				multiplier = (width / Width + master.weightValue / Master.weightValue)/2
-								
-				kerning = math.floor(Kerning[L][R] * multiplier)
-				try:
-					current = font.kerning[master.id][L][R]
-				except KeyError:
-					current = None
-					pass
-				if current != kerning and current != None:
-					print '/' + getName(L) + '/' + getName(R)
-				if current == None:	
-					font.setKerningForPair(master.id, getKernName(L), getKernName(R), kerning)
+			if getWidth(L, Master.id):
+				for R in Kerning[L]:
+					if getWidth(R, Master.id):
+						Width = getWidth(L, Master.id) + getWidth(R, Master.id)
+						width = getWidth(L, master.id) + getWidth(R, master.id)
+						multiplier = (width / Width + master.weightValue / Master.weightValue)/2
+										
+						kerning = math.floor(Kerning[L][R] * multiplier)
+						try:
+							current = font.kerning[master.id][L][R]
+						except:
+							current = None
+						if current != kerning and current != None:
+							output += '/' + getName(L) + '/' + getName(R) + '\n'
+						if current == None:	
+							font.setKerningForPair(master.id, getKernName(L), getKernName(R), kerning)
+					else:
+						if R not in missing:
+							missing.append(getName(R))
+			else:
+				if L not in missing:
+					missing.append(getName(L))
+		
+print output
 
-		print ''
-
-Glyphs.clearLog()
+if len(missing):
+	print '\nKerning groups using non-existent glyph names:\n'
+	for i in missing:
+		print i + '\n'
