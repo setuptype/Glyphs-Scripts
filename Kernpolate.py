@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __doc__="""
-Calculates and applies kerning to all masters based on the kerning in the boldest weight. The script uses glyph widths for calculations.
+Calculates and applies kerning to all masters based on the kerning in the boldest weight. The script uses glyph widths and masters weight values for calculations.
 
 Only works if actual glyph names are used to name groups.
 """
