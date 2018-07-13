@@ -2,18 +2,14 @@
 # -*- coding: utf-8 -*-
 
 __doc__="""
-Displays pairs that aren't kerned, but the glyphs of the pair are in a kerning group OR are kerned with other glyphs OR are usually kerned.
-Example: If pairs AV and LT are kerned, the script will suggest pairs AT and LV.
-
-Pairs consisting of glyphs with both left and right kerning are displayed as triplets, e.g. AVA, OTO.
-
-Only works if actual glyph names are used to name kerning groups.
+Lists all combinations of selection’s kerning groups with all existing kerning groups.
+Only works if actual glyph names are used for kerning groups.
 """
 
+Glyphs.clearLog()
 
-def string(g):
+def context(g):
 	return 'HN' if g[0].isupper() else 'nu'
-
 def getName(g):
 	if g[0] == '@':
 		return g[7:]
@@ -21,15 +17,15 @@ def getName(g):
 		return font.glyphForId_(g).name
 
 font = Glyphs.font
+left = []
+right = []
+selLeft = []
+selRight = []
+existing = []
+skip	= []
+output	= ''
 
-
-# usually kerned glyphs
-
-left	= ['A','O','F','X','L','P','R','S','T','U','V','Y','Z','f','n','o','r','s','t','v','x','z','period','quotesingle','quoteright','slash','question','hyphen','zero','four','six','seven','nine','space']
-right	= ['A','O','J','S','T','U','V','X','Y','Z','f','n','o','s','t','u','v','x','z','period','quotesingle','quoteright','slash','hyphen','question','zero','one','two','three','four','six','seven','nine','space']
-
-
-# get kerning groups
+# get kerning groups from all glyphs
 
 for glyph in font.glyphs:
 	L = glyph.rightKerningGroup
@@ -39,42 +35,54 @@ for glyph in font.glyphs:
 	if R != None and not (R in right):
 		right.append(R)
 
+# get kerning groups from selection
+
+for glyph in font.selection:
+	L = glyph.rightKerningGroup
+	if L != None and not (L in selLeft):
+		selLeft.append(L)
+	R = glyph.leftKerningGroup
+	if R != None and not (R in selRight):
+		selRight.append(R)
+
 # get existing kerning pairs
-# add glyphs with kerning that are not in a group to the left or right list
 
 kerning	= font.kerning[font.selectedFontMaster.id]
-existing = []
-
 for L in kerning:
 	for R in kerning[L]:
 		l = getName(L)
 		r = getName(R)
 		existing.append(l + r)
-		if l not in left:
-			left.append(l)
-		if r not in right:
-			right.append(r)
 
 
-#generate output
+# generate new pairs
 
-skip	= []
-output	= ''
-
-for L in left:
+for g in selLeft:
+	
 	for R in right:
-		pair = '/' + L + '/' + R
-		if L + R not in existing and R + L not in skip:
-			output += string(L) + pair + ' ' + string(R) + '\n'
-			if L in right:
-				skip.append(L + R)
-				output += string(L) + pair + '/' + L + ' ' + string(L) + '\n'
-
-
-#display result
+		if g + R not in existing:
+			pair = '/' + g + '/' + R
+			if R + g not in skip:
+				output += context(g) + pair + ' ' + context(R) + '\n'
+				if g in right:
+					skip.append(g + R)
+					output += context(g) + pair + '/' + g + ' ' + context(g) + '\n'
+			
+for g in selRight:
+	
+	for L in left:
+		if L + g not in existing:
+			pair = '/' + L + '/' + g
+			if g + L not in skip:
+				output += context(L) + pair + ' ' + context(g) + '\n'
+				if g in left:
+					skip.append(L + g)
+					output += context(g) + pair + '/' + g + ' ' + context(g) + '\n'
+				
+				
+# display result
 
 from PyObjCTools.AppHelper import callAfter
 callAfter(Glyphs.currentDocument.windowController().addTabWithString_, output)
 
 # Glyphs.showMacroWindow()
-# Glyphs.clearLog()
