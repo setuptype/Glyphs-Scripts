@@ -1,4 +1,4 @@
-#MenuTitle: List Existing Kerning Pairs
+#MenuTitle: Kerning: List Existing Pairs
 # -*- coding: utf-8 -*-
 
 __doc__="""

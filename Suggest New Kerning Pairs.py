@@ -1,4 +1,4 @@
-#MenuTitle: Suggest New Kerning Pairs
+#MenuTitle: Kerning: Suggest New Pairs
 # -*- coding: utf-8 -*-
 
 __doc__="""
